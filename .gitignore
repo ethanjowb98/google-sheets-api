@@ -1,0 +1,4 @@
+credentials.json
+/reports
+/**/__pycache__/
+.vscode/
