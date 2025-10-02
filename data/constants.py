@@ -1,5 +1,11 @@
 test_case_portal_sheet = "10hmS39tQ2UVeuAk5ssWra3mPR_UBq2ayB8F6w79xmlw"     # Test duplicate sheet
-kpi_qa_automation = "1khv7mCsTjQnEbw2JFDt4nQGPOtk78i3dDNiKVphHmY4"  # KPI QA Automation
+qa_automation_dashboard = "1khv7mCsTjQnEbw2JFDt4nQGPOtk78i3dDNiKVphHmY4"
+
+class QADashboardSheets:
+    environment_testing = "Environment Testing"
+    scripting_task = "Scripting Task"
+    test_script_status = "Test Script Status"
+    test_script_duration = "Test Script Duration"
 
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
 credentials_file = "credentials.json"

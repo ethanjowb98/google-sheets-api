@@ -5,7 +5,7 @@ from time import sleep
 
 import data.constants as constants
 from ..data.constants import TestScriptExecutionStatus
-import gsheets.parse_xml as parse_xml
+import parse_xml
 
 creds = Credentials.from_service_account_file(constants.credentials_file, scopes=constants.scopes)
 client = gspread.authorize(creds)

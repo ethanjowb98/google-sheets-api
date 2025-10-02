@@ -2,12 +2,12 @@ import gspread
 from pathlib import Path
 from gsheets import parse_xml
 from data import constants
-from data.constants import TestScriptExecutionStatus, QADashboardSheets
+from data.constants import QADashboardSheets
 from google.oauth2.service_account import Credentials
 from time import sleep
 
 # Run this python command to run this python script:
-# python -m gsheets.test_script_status
+# python -m gsheets.test_script_duration
 CORE_FEATURE = "HRP"
 ENVIRONMENT = "DEVELOP"
 MILESTONE = "W Sprint | 2025"
@@ -17,7 +17,7 @@ creds = Credentials.from_service_account_file(constants.credentials_file, scopes
 client = gspread.authorize(creds)
 
 sheet = client.open_by_key(constants.qa_automation_dashboard)
-sheet = sheet.worksheet(QADashboardSheets.test_script_status)
+sheet = sheet.worksheet(QADashboardSheets.test_script_duration)
 
 cf_col = sheet.find("CORE FEATURE").col
 tc_col = sheet.find("TEST CASE").col
@@ -41,7 +41,6 @@ col = milestone_col[0] + ENV_OFFSET[ENVIRONMENT]
 
 files = parse_xml.extract_files_to_process()
 total_counter = 0
-
 for f in files:
     tcs = parse_xml.extract_test_case_from_reports(f"{REPORTS_DIR}/{f}")
     counter = 0
@@ -57,15 +56,9 @@ for f in files:
         else:
             row = row.row
 
-        if any([t.is_error, t.is_failed, t.is_skipped]) is False:
-            sheet.update_cell(row, col, TestScriptExecutionStatus.passed)
-        elif any([t.is_error, t.is_failed]):
-            sheet.update_cell(row, col, TestScriptExecutionStatus.failed)
-        elif t.is_skipped:
-            sheet.update_cell(row, col, TestScriptExecutionStatus.not_executed)
+        sheet.update_cell(row, col, t.duration)
 
         counter += 1
         total_counter += 1
-
-        print(f"Total: {total_counter} | Subtotal: {counter}/{len(tcs)} | Updated {t.name}")
+        print(f"Total: {total_counter} | Subtotal: {counter}/{len(tcs)} | Updated {t.name} with duration {t.duration}s")
         sleep(1)
