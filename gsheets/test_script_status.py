@@ -5,11 +5,12 @@ from data import constants
 from data.constants import TestScriptExecutionStatus, QADashboardSheets
 from google.oauth2.service_account import Credentials
 from time import sleep
+from typing import Literal
 
 # Run this python command to run this python script:
 # python -m gsheets.test_script_status
-CORE_FEATURE = "HRP"
-ENVIRONMENT = "DEVELOP"
+CORE_FEATURE: Literal["HRP", "HQA 2", "Boards"] = "Boards"
+ENVIRONMENT: Literal["EPIC", "DEVELOP", "STAGING"] = "DEVELOP"
 MILESTONE = "W Sprint | 2025"
 REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
 
@@ -68,4 +69,4 @@ for f in files:
         total_counter += 1
 
         print(f"Total: {total_counter} | Subtotal: {counter}/{len(tcs)} | Updated {t.name}")
-        sleep(1)
+        sleep(2)
