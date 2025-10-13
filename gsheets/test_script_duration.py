@@ -7,14 +7,21 @@ from google.oauth2.service_account import Credentials
 from time import sleep
 from typing import Literal
 
-# Run this python command to run this python script:
-# python -m gsheets.test_script_duration
 def add_test_script_duration(
     CORE_FEATURE: Literal["HRP", "HQA 2", "Boards"],
     ENVIRONMENT: Literal["EPIC", "DEVELOP", "STAGING"],
     MILESTONE: str
 ):
-    MILESTONE = "W Sprint | 2025"
+    """ Adds the test script duration to the QA Automation Dashboard
+
+    Args:
+        CORE_FEATURE (Literal["HRP", "HQA 2", "Boards"]): The core feature the test cases belong to
+        ENVIRONMENT (Literal["EPIC", "DEVELOP", "STAGING"]): The environment the test cases were run in
+        MILESTONE (str): The milestone the test cases were run in
+
+    Raises:
+        ValueError: If the environment is not valid
+    """
     REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
 
     creds = Credentials.from_service_account_file(constants.credentials_file, scopes=constants.scopes)

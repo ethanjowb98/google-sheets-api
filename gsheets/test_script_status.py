@@ -7,13 +7,21 @@ from google.oauth2.service_account import Credentials
 from time import sleep
 from typing import Literal
 
-# Run this python command to run this python script:
-# python -m gsheets.test_script_status
 def add_test_script_status(
     CORE_FEATURE: Literal["HRP", "HQA 2", "Boards"],
     ENVIRONMENT: Literal["EPIC", "DEVELOP", "STAGING"],
     MILESTONE: str
 ):
+    """ Updates the test script status sheet in the QA Automation Dashboard.
+
+    Args:
+        CORE_FEATURE (Literal["HRP", "HQA 2", "Boards"]): _Core feature being tested._
+        ENVIRONMENT (Literal["EPIC", "DEVELOP", "STAGING"]): _Environment being tested._
+        MILESTONE (str): _Current milestone being tested._
+
+    Raises:
+        ValueError: If the environment is not one of the accepted values.
+    """
     REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
 
     creds = Credentials.from_service_account_file(constants.credentials_file, scopes=constants.scopes)

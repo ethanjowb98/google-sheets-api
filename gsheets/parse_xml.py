@@ -26,9 +26,24 @@ class TestCase:
         """)
 
 def extract_files_to_process() -> list[str]:
+    """Filters out the xml files that contain "filtered" in their name. Also removes
+    any excess html and log files from previous test runs.
+
+    Returns:
+        list[str]: List of xml files with "filtered" in their name.
+    """
     # Removes excess files
     subprocess.run(f"rm -rf {REPORTS_DIR}/*.html {REPORTS_DIR}/*.log", shell=True, check=True)
-    return [f.name for f in Path(REPORTS_DIR).iterdir() if f.name.find("filtered") == -1]
+    # Returns a list of xml files with filtered in the name
+    return [f.name for f in Path(REPORTS_DIR).iterdir() if f.name.find("filtered") != -1]
 
 def extract_test_case_from_reports(filename: str) -> list[TestCase]:
+    """Extracts test cases from the given xml report file.
+
+    Args:
+        filename (str): The name of the xml report file.
+
+    Returns:
+        list[TestCase]: A list of TestCase objects extracted from the report.
+    """
     return [TestCase(tc) for tc in ElementTree.parse(filename).getroot().findall("testsuite/testcase")]
