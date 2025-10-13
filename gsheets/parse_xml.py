@@ -28,8 +28,7 @@ class TestCase:
 def extract_files_to_process() -> list[str]:
     # Removes excess files
     subprocess.run(f"rm -rf {REPORTS_DIR}/*.html {REPORTS_DIR}/*.log", shell=True, check=True)
-
-    return [f.name for f in Path(REPORTS_DIR).iterdir() if f.name.find("filtered") != -1]
+    return [f.name for f in Path(REPORTS_DIR).iterdir() if f.name.find("filtered") == -1]
 
 def extract_test_case_from_reports(filename: str) -> list[TestCase]:
     return [TestCase(tc) for tc in ElementTree.parse(filename).getroot().findall("testsuite/testcase")]

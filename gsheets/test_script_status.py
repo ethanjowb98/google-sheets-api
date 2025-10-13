@@ -9,64 +9,67 @@ from typing import Literal
 
 # Run this python command to run this python script:
 # python -m gsheets.test_script_status
-CORE_FEATURE: Literal["HRP", "HQA 2", "Boards"] = "Boards"
-ENVIRONMENT: Literal["EPIC", "DEVELOP", "STAGING"] = "DEVELOP"
-MILESTONE = "W Sprint | 2025"
-REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
+def add_test_script_status(
+    CORE_FEATURE: Literal["HRP", "HQA 2", "Boards"],
+    ENVIRONMENT: Literal["EPIC", "DEVELOP", "STAGING"],
+    MILESTONE: str
+):
+    REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
 
-creds = Credentials.from_service_account_file(constants.credentials_file, scopes=constants.scopes)
-client = gspread.authorize(creds)
+    creds = Credentials.from_service_account_file(constants.credentials_file, scopes=constants.scopes)
+    client = gspread.authorize(creds)
 
-sheet = client.open_by_key(constants.qa_automation_dashboard)
-sheet = sheet.worksheet(QADashboardSheets.test_script_status)
+    sheet = client.open_by_key(constants.qa_automation_dashboard)
+    sheet = sheet.worksheet(QADashboardSheets.test_script_status)
 
-cf_col = sheet.find("CORE FEATURE").col
-tc_col = sheet.find("TEST CASE").col
+    cf_col = sheet.find("CORE FEATURE").col
+    tc_col = sheet.find("TEST CASE").col
 
-# Finds what column values your current milestone is in the sorts it out in ascending order
-milestone_col = sorted([n.col for n in sheet.findall(MILESTONE)])
+    # Finds what column values your current milestone is in the sorts it out in ascending order
+    milestone_col = sorted([n.col for n in sheet.findall(MILESTONE)])
 
-# Given that for each milestone there are 3 environments and its placement is in order EPIC, DEVeELOP, STAGING
-ENV_OFFSET = {
-    "EPIC": 0,
-    "DEVELOP": 1,
-    "STAGING": 2,
-}
+    # Given that for each milestone there are 3 environments and its placement is in order EPIC, DEVeELOP, STAGING
+    ENV_OFFSET = {
+        "EPIC": 0,
+        "DEVELOP": 1,
+        "STAGING": 2,
+    }
 
-# Validates that the environment is correct
-if ENVIRONMENT not in ENV_OFFSET.keys():
-    raise ValueError(f"Environment {ENVIRONMENT} is not valid. Must be one of {list(ENV_OFFSET.keys())}")
+    # Validates that the environment is correct
+    if ENVIRONMENT not in ENV_OFFSET.keys():
+        raise ValueError(f"Environment {ENVIRONMENT} is not valid. Must be one of {list(ENV_OFFSET.keys())}")
 
-# Sets the column to the correct environment
-col = milestone_col[0] + ENV_OFFSET[ENVIRONMENT]
+    # Sets the column to the correct environment
+    col = milestone_col[0] + ENV_OFFSET[ENVIRONMENT]
 
-files = parse_xml.extract_files_to_process()
-total_counter = 0
+    files = parse_xml.extract_files_to_process()
+    total_counter = 0
 
-for f in files:
-    tcs = parse_xml.extract_test_case_from_reports(f"{REPORTS_DIR}/{f}")
-    counter = 0
-    for t in tcs:
-        # Initializes the row variable if it can find an existing test case name
-        row = sheet.find(t.name)
+    print("Starting to update test script status...")
+    for f in files:
+        tcs = parse_xml.extract_test_case_from_reports(f"{REPORTS_DIR}/{f}")
+        counter = 0
+        for t in tcs:
+            # Initializes the row variable if it can find an existing test case name
+            row = sheet.find(t.name)
 
-        # If it cannot find the test case name then it will find the next available row
-        if row is None:
-            row = len(sheet.col_values(2)) + 1
-            sheet.update_cell(row, cf_col, CORE_FEATURE)
-            sheet.update_cell(row, tc_col, t.name)
-        else:
-            row = row.row
+            # If it cannot find the test case name then it will find the next available row
+            if row is None:
+                row = len(sheet.col_values(2)) + 1
+                sheet.update_cell(row, cf_col, CORE_FEATURE)
+                sheet.update_cell(row, tc_col, t.name)
+            else:
+                row = row.row
 
-        if any([t.is_error, t.is_failed, t.is_skipped]) is False:
-            sheet.update_cell(row, col, TestScriptExecutionStatus.passed)
-        elif any([t.is_error, t.is_failed]):
-            sheet.update_cell(row, col, TestScriptExecutionStatus.failed)
-        elif t.is_skipped:
-            sheet.update_cell(row, col, TestScriptExecutionStatus.not_executed)
+            if any([t.is_error, t.is_failed, t.is_skipped]) is False:
+                sheet.update_cell(row, col, TestScriptExecutionStatus.passed)
+            elif any([t.is_error, t.is_failed]):
+                sheet.update_cell(row, col, TestScriptExecutionStatus.failed)
+            elif t.is_skipped:
+                sheet.update_cell(row, col, TestScriptExecutionStatus.not_executed)
 
-        counter += 1
-        total_counter += 1
+            counter += 1
+            total_counter += 1
 
-        print(f"Total: {total_counter} | Subtotal: {counter}/{len(tcs)} | Updated {t.name}")
-        sleep(2)
+            print(f"Total: {total_counter} | Subtotal: {counter}/{len(tcs)} | Updated {t.name}")
+            sleep(1.25)
