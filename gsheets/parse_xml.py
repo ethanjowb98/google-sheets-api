@@ -25,6 +25,18 @@ class TestCase:
             Is skipped: {self.is_skipped}
         """)
 
+def does_file_name_contains(file: Path, text: str) -> bool:
+    """Checks if the given text is present in the file name.
+
+    Args:
+        file (Path): The file path object.
+        text (str): The text to search for in the file name.
+
+    Returns:
+        bool: True if the text is found in the file name, False otherwise.
+    """
+    return file.name.find(text) != -1
+
 def extract_files_to_process() -> list[str]:
     """Filters out the xml files that contain "filtered" in their name. Also removes
     any excess html and log files from previous test runs.
@@ -35,7 +47,8 @@ def extract_files_to_process() -> list[str]:
     # Removes excess files
     subprocess.run(f"rm -rf {REPORTS_DIR}/*.html {REPORTS_DIR}/*.log", shell=True, check=True)
     # Returns a list of xml files with filtered in the name
-    return [f.name for f in Path(REPORTS_DIR).iterdir() if f.name.find("filtered") != -1]
+    return [f.name for f in Path(REPORTS_DIR).iterdir() if does_file_name_contains(f, "filtered")]
+    # return [f.name for f in Path(REPORTS_DIR).iterdir()]
 
 def extract_test_case_from_reports(filename: str) -> list[TestCase]:
     """Extracts test cases from the given xml report file.
