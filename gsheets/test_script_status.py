@@ -60,6 +60,7 @@ def add_test_script_status(
         for t in tcs:
             # Initializes the row variable if it can find an existing test case name
             row = sheet.find(t.name)
+            status = "default"
 
             # If it cannot find the test case name then it will find the next available row
             if row is None:
@@ -71,13 +72,16 @@ def add_test_script_status(
 
             if any([t.is_error, t.is_failed, t.is_skipped]) is False:
                 sheet.update_cell(row, col, TestScriptExecutionStatus.passed)
+                status = "passed"
             elif any([t.is_error, t.is_failed]):
                 sheet.update_cell(row, col, TestScriptExecutionStatus.failed)
+                status = "failed"
             elif t.is_skipped:
                 sheet.update_cell(row, col, TestScriptExecutionStatus.not_executed)
+                status = "skipped"
 
             counter += 1
             total_counter += 1
 
-            print(f"Total: {total_counter} | Subtotal: {counter}/{len(tcs)} | Updated {t.name}")
+            print(f"Total: {total_counter} | Subtotal: {counter}/{len(tcs)} | Updated {t.name} {status}")
             sleep(1.25)

@@ -44,11 +44,41 @@ def extract_files_to_process() -> list[str]:
     Returns:
         list[str]: List of xml files with "filtered" in their name.
     """
+    # Using glob so *.zip works or any * conditions
+
+    # Moves any downloaded zip files to reports directory
+    if list(Path.home().glob("Downloads/*.zip")):
+        print("Moving downloaded report files...")
+        subprocess.run(f"mv ~/Downloads/*.zip {REPORTS_DIR}/", shell=True, check=True)
+
+    # Makes sure to extract any zip files in the reports directory
+    if list(Path(REPORTS_DIR).glob("*.zip")):
+        print("Extracting report files...")
+        subprocess.run(f"unzip -o {REPORTS_DIR}/*.zip -d {REPORTS_DIR}/", shell=True, check=True)
+        print("Organizing extracted files...")
+
+    # Moves any extracted files from nested tests/reports directory to reports directory
+    if list(Path(REPORTS_DIR / "tests" / "reports").glob("*")):
+        subprocess.run(f"mv {REPORTS_DIR}/tests/reports/* {REPORTS_DIR}/", shell=True, check=True)
+        print("Cleaning up extracted files...")
+        subprocess.run(f"rm -rf {REPORTS_DIR}/tests {REPORTS_DIR}/*.zip", shell=True, check=True)
+
+    # Moves any downloaded xml files to reports directory
+    if list(Path.home().glob("Downloads/*.xml")):
+        print("Moving downloaded xml report files...")
+        subprocess.run(f"mv ~/Downloads/*.xml {REPORTS_DIR}/", shell=True, check=True)
+
     # Removes excess files
     subprocess.run(f"rm -rf {REPORTS_DIR}/*.html {REPORTS_DIR}/*.log", shell=True, check=True)
     # Returns a list of xml files with filtered in the name
-    return [f.name for f in Path(REPORTS_DIR).iterdir() if does_file_name_contains(f, "filtered")]
-    # return [f.name for f in Path(REPORTS_DIR).iterdir()]
+    if list(Path(REPORTS_DIR).glob("*filtered*.xml")):
+        print("Using filtered report files...")
+        files = [f.name for f in Path(REPORTS_DIR).iterdir() if does_file_name_contains(f, "filtered")]
+    else:
+        print("Using all report files...")
+        files = [f.name for f in Path(REPORTS_DIR).iterdir()]
+    print(files)
+    return files
 
 def extract_test_case_from_reports(filename: str) -> list[TestCase]:
     """Extracts test cases from the given xml report file.
